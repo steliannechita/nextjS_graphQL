@@ -1,65 +1,43 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import {
+  TasksDocument,
+  TasksQuery,
+  useTasksQuery,
+} from "../generated/graphql-frontend";
+import { initializeApollo } from "../lib/client";
+import TaskList from "../components/TaskList";
+import CreateTaskForm from "../components/CreateTaskForm";
 
 export default function Home() {
+  const result = useTasksQuery();
+  const tasks = result.data?.tasks;
+
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Tasks</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+      <CreateTaskForm onSuccess={result.refetch} />
+      {result.loading ? (
+        <h1>Loading tasks...</h1>
+      ) : result.error ? (
+        <h1>An error occured</h1>
+      ) : tasks && tasks.length ? (
+        <TaskList tasks={tasks} />
+      ) : (
+        <h1 className="no-tasks-message">There are no tasks</h1>
+      )}
     </div>
-  )
+  );
 }
+
+export const getStaticProps = async () => {
+  const apolloClient = initializeApollo();
+  await apolloClient.query<TasksQuery>({ query: TasksDocument });
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+  };
+};
