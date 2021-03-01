@@ -1,3 +1,5 @@
+# Tutorial : Learn how to use TypeScript to build React projects (including Next.js and Apollo GraphQL). -->udemy
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
