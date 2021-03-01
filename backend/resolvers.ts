@@ -91,6 +91,7 @@ export const resolvers: Resolvers<ApolloContext> = {
     },
     async deleteTask(parent, args, context) {
       const task = await getTaskById(args.id, context.db);
+
       if (!task) {
         throw new UserInputError(`Couldn't find task !`);
       }
